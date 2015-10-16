@@ -1,0 +1,205 @@
+#include "ADNF.h"
+#include <stdlib.h>
+
+void InitAndClauseLinkedList(ADNFClause *dnf)
+{
+	*dnf = malloc(sizeof(AAndClause));
+	(*dnf) -> next=0;
+	(*dnf) -> prev=0;
+}
+
+AAndClause * RemoveClause(AAndClause *a)
+{
+  AAndClause *prev = a->prev;
+	prev->next= a->next;
+	
+	if (a->next)
+		a->next->prev= prev;
+	
+	free(a);
+	return prev;
+}
+
+
+AAndClause * AddClauseNoQuestionsAsked(AAndClause *prev, ASet clause)
+{
+	AAndClause *next= prev->next;
+	
+	prev->next= malloc(sizeof(AAndClause));	//from this point on, prev->next is the CURRENT RECORD
+	
+	prev->next->set= clause;			//COPY THE SET, This may change if we ever go beyond 8x8
+	
+	prev->next->prev= prev;
+	prev->next->next= next;
+	
+	return prev->next;
+}
+
+AAndClause * AddClause(ADNFClause dnf, ASet clause) //returns 1 if really added
+{
+	AAndClause *cur= dnf;
+	
+	if (SET_ISFALSE(clause))	//Not adding ( a AND NOT(a) )
+		return 0;
+	
+	#ifdef LOG_LINKEDLIST
+	printf("cur->next= %d\n", cur->next);
+	#endif
+	
+	while (cur->next)
+	{
+		cur=cur->next;
+		
+		if (SET_ALL_ATOMS(cur->set) == SET_ALL_ATOMS(clause) ) // a.~b + a.b = a
+		{
+			int difference= SetOnlyDifference( SET_LOWERHALF(cur->set), SET_LOWERHALF(clause));
+
+<<<<<<< HEAD
+			printf("Difference of %lu and %lu = %d\n", cur->set, clause, difference);
+=======
+>>>>>>> 04bda1f7717c0aee71438700e25c4486d599e18f
+			if (difference>=0)	//it's legit!
+			{
+				RemoveClause(cur);	//we want to re-add to check further possible simplifications
+				
+				SET_REMOVE(clause, difference);
+				SET_REMOVE(clause, SET_INDEX_NEGATE(difference) );
+				
+				cur= dnf;
+				continue; //restart the loop
+			}
+		}
+		
+		
+		switch (Contains( &(cur->set), &clause) )// The one in the chain is preferred if they are equal
+		{
+			case 1:	//The one in the chain contains the one to be added ( Is more specific)
+//				printf("head %d head->prev->next %d\n", head, head->prev->next);
+				
+					
+				cur= RemoveClause(cur);
+				break;
+			
+			case -1:	//The one to be added contains (is more specific than) the one already in the chain
+				#ifdef LOG_LINKEDLIST
+				printf("Clause %d>%d already there in wire %d at stack entry %d\n", clause, cur->set, w, cur->inQueue);
+				#endif
+				return 0;
+				break;
+				
+			case 0: //Nothing to see here
+				break;
+		}
+		
+	}
+	
+	return AddClauseNoQuestionsAsked(cur, clause);
+}
+
+
+AAndClause * Last(ADNFClause head)
+{
+	for (; head->next; head= head->next);
+	
+	return head;
+}
+
+int DNFSize(ADNFClause dnf)
+{
+	int i=0;
+	for (dnf=dnf->next; dnf; dnf=dnf->next)
+		i++;
+		
+	return i;
+}
+
+void PrintDNFClause(ADNFClause dnf)
+{
+	AAndClause *andClause= dnf;
+	while (andClause->next)
+	{
+		andClause = andClause->next;
+		
+<<<<<<< HEAD
+		printf("%lu ", andClause->set);
+=======
+		PrintSet_IncNeg(andClause->set);
+>>>>>>> 04bda1f7717c0aee71438700e25c4486d599e18f
+		 
+	}
+	printf("\n");
+}
+
+void ClearDNFClause(ADNFClause dnf)
+{
+	while (dnf->next)
+		RemoveClause(dnf->next);
+}
+
+void QuickSort(ASet *a, int size)
+{
+	int p, barrier;
+	ASet t;
+	
+	if (size<=1)
+		return;
+//partition		
+	p=0;
+	
+	for (barrier=1; barrier<size; barrier++)
+	{
+		if (a[barrier]>= a[p])
+			continue; //it is where it should be!
+			
+		//if it should be on the other side:
+		t= a[barrier];
+		a[barrier]= a[p+1];
+		a[p+1]= a[p];
+		a[p]= t;
+		p++;
+	}
+//recursion
+	
+	QuickSort(a, p);
+	QuickSort(a+p+1, size-p-1);
+}
+
+ASet* BinSearch(ASet v, ASet *a, int size)
+{
+	if (size==0)
+		return 0;
+	else if (v < a[size/2])
+		return BinSearch( v, a, size/2);
+	else if (v > a[size/2])
+		return BinSearch( v, a+ size/2+1, size - size/2 -1);
+	else
+		return a + size/2;
+
+}
+
+void AddDontCare(ADNFClause dst, ADNFClause src)
+{
+  int dontCaresSize= DNFSize(src);
+  ASet * dontCares= malloc(dontCaresSize);
+  AAndClause *curDontCare;
+  
+  dontCaresSize=0;
+  for (src=src->next; src; src= src->next)
+  {
+  	curDontCare= AddClause(dst, src->set); //add the and clause and keep a record of it
+  	
+//  	if (curDontCare && curDontCare->set== src->set) //if it is really added and not yet proven useful
+  	//if the set is different than what was originally added, means it has simplified.
+//  	{
+ 		dontCares[dontCaresSize]= src->set;
+ 		dontCaresSize++;
+//  	}
+  }
+  
+  QuickSort(dontCares, dontCaresSize);
+  
+  //Delete the ones who didn't make a difference
+  for (dst= dst->next; dst; dst=dst->next)
+  	if (BinSearch(dst->set, dontCares, dontCaresSize))
+  		dst = RemoveClause(dst);	//go back to prev
+}

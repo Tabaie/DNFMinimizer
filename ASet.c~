@@ -1,0 +1,130 @@
+#include "ASet.h"
+<<<<<<< HEAD
+=======
+#include <stdio.h>
+>>>>>>> 04bda1f7717c0aee71438700e25c4486d599e18f
+
+int Contains(ASet *a, ASet *b)
+{
+	if (*a==*b)	//IF THEY ARE EQUAL, FAVOR a, THE ONE ALREADY IN THE CHAIN
+		return -1;
+
+	if ( (*a^*b) == (*a-*b))
+		return 1;
+	
+	if ( (*a^*b) == (*b-*a) )
+		return -1;
+
+	return 0;
+}
+
+void Add(ASet *a, int itemIndex)
+{
+	*a|= 1<< itemIndex;
+}
+
+void Remove(ASet *a, int itemIndex)
+{
+	*a&= -1 ^ (1<<itemIndex);
+}
+<<<<<<< HEAD
+
+=======
+ 
+>>>>>>> 04bda1f7717c0aee71438700e25c4486d599e18f
+void Clear(ASet *a)
+{
+	*a=0;
+}
+
+void Union(ASet *a, ASet *b)
+{
+	*a= *a | *b;
+}
+
+
+int SetOnlyDifference(ASet a, ASet b)
+{
+<<<<<<< HEAD
+/* int i,j;
+ int ones= 1<<size -1;
+ 
+ a= a ^ b;	//the differences
+ i=0;
+ j= size-1;
+ do
+ {
+ 	size/=2;
+ 	ones = ones>>size;
+ 	
+ 	b= a & ones;	//the lower half
+ 	a= a >> size; //the higher half
+ 	
+ 	if (b && a)
+ 		return -1;	//the don't have only one difference
+ } while ();*/
+=======
+>>>>>>> 04bda1f7717c0aee71438700e25c4486d599e18f
+  int i;
+  int twoPow;
+  
+  if (a==b)
+  	return -1;	//they are not different at all
+  
+  twoPow=1;
+  for (i=0; (a & twoPow) == ( b & twoPow) ; i++)
+  {
+  	twoPow*=2;
+  }
+  
+  // A difference is found now, there should be equal from AFTER that point
+  i++;
+  
+  
+  if ((a >> i) != (b >> i))
+  	return -1;	//they are still different from this point on.
+  	
+  return i;
+}
+<<<<<<< HEAD
+=======
+
+
+void PrintSet(ASet a)
+{
+	int i;
+	for (i=0; i< sizeof(ASet)*8; i++)
+	{
+		if (a%2)
+			printf("_%d", i);
+			
+		a/=2;
+	}
+	
+	printf(" ");
+}
+
+void PrintSet_IncNeg(ASet)	//Print a set with negated literals
+{
+	int i;
+	for (i=0; i< sizeof(ASet)*4; i++)
+	{
+		if (a%2)
+			printf("_%d", i);
+			
+		a/=2;
+	}
+
+	for (i=0; i< sizeof(ASet)*4; i++)
+	{
+		if (a%2)
+			printf("_~%d", i);
+			
+		a/=2;
+	}
+
+	
+	printf(" ");
+
+}
+>>>>>>> 04bda1f7717c0aee71438700e25c4486d599e18f
