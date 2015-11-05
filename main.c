@@ -20,19 +20,19 @@ int main()
 	andClause=-1;	//-1 is ALWAYS FALSE
 	AddClause(lt, andClause);
 	
-	for (i=0; i<4; i++)
+	for (i=0; i<3; i++)
 	{
 		ClearDNFClause(t1);
 
 		SET_CLEAR(andClause);
-		SET_ADD(andClause,i);	//A_i . B_i
-		SET_ADD(andClause,i+4);
-		AddClause(t1, andClause);
+		SET_ADD(andClause,i);	//A_i
+		SET_ADD(andClause,i+4);//B_i
+		AddClause(t1, andClause);//A_i . B_i
 		
 		SET_CLEAR(andClause);
-		SET_ADD(andClause, SET_INDEX_NEGATE(i  ));	//not(A_i) . not(B_i)
-		SET_ADD(andClause, SET_INDEX_NEGATE(i+4));
-		AddClause(t1, andClause);
+		SET_ADD(andClause, SET_INDEX_NEGATE(i  ));//not(A_i)	
+		SET_ADD(andClause, SET_INDEX_NEGATE(i+4));//not(B_i)
+		AddClause(t1, andClause);//not(A_i) . not(B_i)
 
 		AND(eq, t1); // eq_i = (a_i.b_i + ~a_i.~b_i).eq_{i-1}
 		
@@ -49,7 +49,7 @@ int main()
 //		printf("%dbEq:\n", i+1);
 //		PrintDNFClause(eq);
 	}
-
+return 0;
 //Adding BCD DON'T CARE!!
 	ClearDNFClause(t1);
 	

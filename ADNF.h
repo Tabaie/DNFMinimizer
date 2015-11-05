@@ -29,7 +29,7 @@ typedef AAndClause * ADNFClause;
 
 AAndClause * RemoveClause(AAndClause *a); //Returns the pointer to the PREVIOUS record
 void InitAndClauseLinkedList(ADNFClause *);
-AAndClause * AddClause(ADNFClause dnf, ASet clause); //returns address if it is really added, it is assumed that w->formulaHead= head
+int AddClause(ADNFClause dnf, ASet clause); //returns 1 if the formula is complicated further in result, 0 if nothing has changed, -1 if the formula has been simplified
 void PrintDNFClause(ADNFClause dnf);
 void AddDontCare(ADNFClause dst, ADNFClause src);
 void ClearDNFClause(ADNFClause dnf);
@@ -41,3 +41,4 @@ ADNFClause CPY(ADNFClause src);
 void AND( ADNFClause dst, ADNFClause src);
 void OR ( ADNFClause dst, ADNFClause src);
 void NOT( ADNFClause dst);
+void freeDNFClause(ADNFClause dnf);

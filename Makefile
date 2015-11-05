@@ -1,6 +1,5 @@
-
-all: ASet.o AndClauseLinkedList.o DNFCMD.o
-	gcc ASet.o AndClauseLinkedList.o DNFCMD.o -o DNFConverter.o
+all: main.c ASet.o AndClauseLinkedList.o DNFCMD.o
+	gcc main.c ASet.o AndClauseLinkedList.o DNFCMD.o -o DNFConverter
 
 AndClauseLinkedList.o: ADNF.h AndClauseLinkedList.c
 	gcc -c AndClauseLinkedList.c

@@ -1,8 +1,4 @@
 #include "ASet.h"
-<<<<<<< HEAD
-#include <stdio.h>
-=======
->>>>>>> 04bda1f7717c0aee71438700e25c4486d599e18f
 
 //#define LOG_ALL
 
@@ -13,12 +9,6 @@
 	#define LOG_CROSSBAR
 #endif
 
-<<<<<<< HEAD
-//struct DNF;
-//typedef struct DNF DNF;
-
-=======
->>>>>>> 04bda1f7717c0aee71438700e25c4486d599e18f
 typedef struct AAndClause
 {
 //Linked List Stuff
@@ -30,37 +20,16 @@ typedef struct AAndClause
 	
 } AAndClause;
 
-<<<<<<< HEAD
-typedef AAndClause * ADNFClause;
-
-// LOGICAL OPERATIONS ON DNFS
-void CPYTO(ADNFClause dst, ADNFClause src);
-AAndClause * GetLastAndClause(ADNFClause dnf);
-ADNFClause CPY(ADNFClause src);
-void AND( ADNFClause dst, ADNFClause src);
-void OR ( ADNFClause dst, ADNFClause src);
-void NOT( ADNFClause dst);
-=======
 
 typedef AAndClause * ADNFClause;
 
 //THE CROSSBAR
->>>>>>> 04bda1f7717c0aee71438700e25c4486d599e18f
 
 // AND CLAUSES IN A LINKED LIST
 
 AAndClause * RemoveClause(AAndClause *a); //Returns the pointer to the PREVIOUS record
 void InitAndClauseLinkedList(ADNFClause *);
-<<<<<<< HEAD
-AAndClause * AddClause(ADNFClause dnf, ASet clause); //returns its position if really added, 0 otherwise
-void PrintDNFClause(ADNFClause dnf);
-int DNFSize(ADNFClause dnf);	//Used to see if adding the DON'T CARE actually increased the formula's size (it shouldn't!)
-AAndClause * AddClauseNoQuestionsAsked(AAndClause *prev, ASet clause);
-AAndClause * Last(ADNFClause head);
-void ClearDNFClause(ADNFClause head);
-void AddDontCareClause(ADNFClause dst, ADNFClause src);
-=======
-int AddClause(ADNFClause dnf, ASet clause); //returns 1 if it is really added, it is assumed that w->formulaHead= head
+AAndClause * AddClause(ADNFClause dnf, ASet clause); //returns address if it is really added, it is assumed that w->formulaHead= head
 void PrintDNFClause(ADNFClause dnf);
 void AddDontCare(ADNFClause dst, ADNFClause src);
 void ClearDNFClause(ADNFClause dnf);
@@ -72,4 +41,4 @@ ADNFClause CPY(ADNFClause src);
 void AND( ADNFClause dst, ADNFClause src);
 void OR ( ADNFClause dst, ADNFClause src);
 void NOT( ADNFClause dst);
->>>>>>> 04bda1f7717c0aee71438700e25c4486d599e18f
+void freeDNFClause(ADNFClause dnf);

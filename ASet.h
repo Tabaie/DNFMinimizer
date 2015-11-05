@@ -1,14 +1,22 @@
 
 typedef unsigned long long ASet;
 
-#define ASET_SIZE_HALF (sizeof(ASet)* 8 /2)
+#define ASET_SIZE_DIVISIONFACTOR 2	//We shouldn't need this, but there is inconsistency in the size of the words
+//#define ASET_SIZE (sizeof(ASet)* 8 / ASET_SIZE_DIVISIONFACTOR)
+#define ASET_SIZE 16
+#define ASET_SIZE_HALF (ASET_SIZE/2)
+
+
 
 #define SET_CONTAINS(a,b) (	((a)==(b))?		(-1):		((a)^(b) == (a)-(b))?			(1):			((a)^(b) == (b)-(a))?				(-1):0)
 														
 int Contains(ASet *a, ASet *b);	//1: a contains b, 0: none, -1 b contains a
 
 #define SET_ADD(a,itemIndex) {(a)|= 1<<(itemIndex);}
+#define SET_ADDE(a, itemIndex) ((a) | 1 <<(itemIndex)) //Doesn't modify a, just gives an EXPRESSION
 void Add(ASet *a, int itemIndex);
+
+#define SET_MEMBER(a, itemIndex) ( (a) & (1<< (itemIndex)) )
 
 #define SET_REMOVE(a,itemIndex) {	(a)&= -1 ^ (1<<(itemIndex));}
 void Remove(ASet *a, int itemIndex);
@@ -30,8 +38,10 @@ void Union(ASet *a, ASet *b);
 
 #define SET_NEGATE_ALL(a) ((a)<< ASET_SIZE_HALF)	//MAKE SURE SHIFT LEFT IS CIRCULAR. THIS IS NOT EQUIVALENT TO A NOT OPERATION ON AN AND CLAUSE
 
-#define SET_INDEX_NEGATE(a) ((a)+ ASET_SIZE_HALF)
+#define SET_INDEX_NEGATE(a) (((a)+ ASET_SIZE_HALF)% ASET_SIZE)
 
 int SetOnlyDifference(ASet a, ASet b);	//If they are different in only one bit, its index is returned, -1 otherwise
 
 void PrintSet_IncNeg(ASet);	//Print a set with negated literals
+
+#define LOGIC_NORMALIZE(a) ((a)?1:0)

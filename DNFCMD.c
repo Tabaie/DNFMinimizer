@@ -2,10 +2,6 @@
 #include "ADNF.h"
 #include <stdlib.h>
 
-void CancelOutNegation();
-
-void CancelOutAllNegations();
-
 void CPYTO(ADNFClause dst, ADNFClause src)	//Both are considered HEADS
 {
 
@@ -87,20 +83,21 @@ void NOT( ADNFClause dst)
 {
 	ADNFClause oldChainHead;
 	ADNFClause newORClause;	//each previously AND clause becomes an OR clause
+	int i;
+
 	oldChainHead->next= dst->next;
 	oldChainHead->prev= 0;
-	ASet literals;
-	int i;
 	
 	dst->next=0;
-	InitDNFClause(&newOrClause);
+	InitAndClauseLinkedList(&newORClause);
 	
 	for (oldChainHead= oldChainHead->next; oldChainHead; oldChainHead= oldChainHead->next)
 	{
-		for (i=0; i<sizeof(ASet)*8; i++)
-		{
-			if (SET_
-			literals*=2;
-		}
+		for (i=0; i<ASET_SIZE; i++)
+			if (SET_MEMBER(oldChainHead->set, i))
+				AddClause(newORClause, SET_ADDE(0, SET_INDEX_NEGATE(i)));
+
+		AND(dst, newORClause);
+		ClearDNFClause(newORClause);
 	}
 }

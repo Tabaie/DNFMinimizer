@@ -1,5 +1,6 @@
 #include "ADNF.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 void InitAndClauseLinkedList(ADNFClause *dnf)
 {
@@ -35,57 +36,113 @@ AAndClause * AddClauseNoQuestionsAsked(AAndClause *prev, ASet clause)
 	return prev->next;
 }
 
-AAndClause * AddClause(ADNFClause dnf, ASet clause) //returns address if really added
+int AddClause(ADNFClause dnf, ASet clause) //returns address if really added
 {
+	int i;
 	AAndClause *cur= dnf;
-	
+	ASet allAtomsIntersection;
+
 	if (SET_ISFALSE(clause))	//Not adding ( a AND NOT(a) )
 		return 0;
 	
-	#ifdef LOG_LINKEDLIST
-	printf("cur->next= %d\n", cur->next);
-	#endif
-	
+
 	while (cur->next)
 	{
 		cur=cur->next;
-		
-		if (SET_ALL_ATOMS(cur->set) == SET_ALL_ATOMS(clause) ) // a.~b + a.b = a
-		{
-			int difference= SetOnlyDifference( SET_LOWERHALF(cur->set), SET_LOWERHALF(clause));
 
-			if (difference>=0)	//it's legit!
-			{
-				RemoveClause(cur);	//we want to re-add to check further possible simplifications
-				
-				SET_REMOVE(clause, difference);
-				SET_REMOVE(clause, SET_INDEX_NEGATE(difference) );
-				
-				cur= dnf;
-				continue; //restart the loop
-			}
-		}
-		
-		
+
 		switch (Contains( &(cur->set), &clause) )// The one in the chain is preferred if they are equal
 		{
-			case 1:	//The one in the chain contains the one to be added ( Is more specific)
+		case 1:	//The one in the chain contains the one to be added ( Is more specific)
 //				printf("head %d head->prev->next %d\n", head, head->prev->next);
-				
-					
-				cur= RemoveClause(cur);
-				break;
+							
+			cur= RemoveClause(cur);
+			break;
 			
-			case -1:	//The one to be added contains (is more specific than) the one already in the chain
-				#ifdef LOG_LINKEDLIST
-				printf("Clause %d>%d already there in wire %d at stack entry %d\n", clause, cur->set, w, cur->inQueue);
-				#endif
-				return 0;
-				break;
+		case -1:	//The one to be added contains (is more specific than) the one already in the chain
+			#ifdef LOG_LINKEDLIST
+			printf("Clause %d>%d already there in wire %d at stack entry %d\n", clause, cur->set, w, cur->inQueue);
+			#endif
+			break;
 				
-			case 0: //Nothing to see here
-				break;
-		}
+		case 0: //Nothing to see here
+			allAtomsIntersection= SET_INTERSECTION( SET_ALL_ATOMS(cur->set), SET_ALL_ATOMS(clause) );
+		
+			for (i=0; i<ASET_SIZE_HALF; i++)
+			{
+				if (SET_MEMBER(allAtomsIntersection, i) )	//looking for a and ~a
+				{
+					if ( LOGIC_NORMALIZE(SET_MEMBER(cur->set, i)) != LOGIC_NORMALIZE(SET_MEMBER(clause, i)) ) //one of them has a and the other ~a
+					{
+						ASet f1, f2;
+						if ( SET_MEMBER(clause, i))
+						{
+							f1=clause;
+							f2=cur->set;
+						}
+						else
+						{
+							f2= clause;
+							f1= cur->set;
+						}
+						// f1 has a and f2 has ~a
+						SET_REMOVE(f2, SET_INDEX_NEGATE(i));
+						SET_REMOVE(f1, i);
+					
+						//Now neither has either!!
+						
+						if (f1==f2)
+						{
+							RemoveClause(cur);
+							clause= f1;
+							cur= dnf;
+							break;	//break out of the for loop.
+						}
+						else
+						{
+							int fa=	//1 if it is of form fa + ff'~a, -1 if f~a + ff'a, 0 if neither
+								SET_CONTAINS(f2,f1);
+							
+							if (fa==1)	//fa+ ff'~a = fa + ff'a. f1=f, f2=ff'
+							{
+								//if fa is in the chain, we need not touch it! Just simplify ff'~a to ff'
+								if ( SET_MEMBER(cur->set, i))
+									clause= f2;
+
+								else // if ff'~a is in the chain, we have to delete it and insert ff' in again. Then fa will be added back. (Is it necessary?)
+								{
+									RemoveClause(cur);
+									AddClause(dnf, f2);
+								}
+								
+								cur= dnf;// Restart the outer while loop
+								break; //from the for loop
+		
+							}
+							else if (fa==-1)//ff'a + f~a= ff' + f~a. f1=ff', f2=f
+							{
+								//if f~a is in the chain, we need not touch it. Just simplify ff'a to ff'
+								if (SET_MEMBER(cur->set, SET_INDEX_NEGATE(i)) )
+									clause= f1;
+								else // if ff'a is in the chain, we delete it and insert ff' in again. Then f~a will be added again.
+								{
+									RemoveClause(cur);
+									AddClause(dnf, f1);
+								}
+								
+								cur= dnf;
+								break;
+							}
+						}//end if
+					
+					}//end if
+				}//end if
+			}//end for
+
+		}//end switch
+
+		
+		
 		
 	}
 	
@@ -124,8 +181,15 @@ void PrintDNFClause(ADNFClause dnf)
 
 void ClearDNFClause(ADNFClause dnf)
 {
-	while (dnf->next)
-		RemoveClause(dnf->next);
+	ADNFClause next, cur= dnf->next;
+
+	dnf->next=0;
+	
+	for (; cur; cur=next)
+	{
+		next= cur->next;
+		free(cur);
+	}
 }
 
 void QuickSort(ASet *a, int size)

@@ -1,11 +1,8 @@
+all: main.c DNFConverter.o
+	gcc main.c DNFConverter.o -o DNFConverter
 
-<<<<<<< HEAD
-all: main.c ASet.o AndClauseLinkedList.o DNFCMD.o
-	gcc main.c ASet.o AndClauseLinkedList.o DNFCMD.o -o DNFConverter
-=======
-all: ASet.o AndClauseLinkedList.o DNFCMD.o
+DNFConverter.o: ASet.o AndClauseLinkedList.o DNFCMD.o
 	gcc -c ASet.o AndClauseLinkedList.o DNFCMD.o -o DNFConverter.o
->>>>>>> 04bda1f7717c0aee71438700e25c4486d599e18f
 
 AndClauseLinkedList.o: ADNF.h AndClauseLinkedList.c
 	gcc -c AndClauseLinkedList.c
@@ -13,9 +10,5 @@ AndClauseLinkedList.o: ADNF.h AndClauseLinkedList.c
 DNFCMD.o: ADNF.h DNFCMD.c
 	gcc -c DNFCMD.c
 
-<<<<<<< HEAD
-ASet.o:
-=======
 ASet.o: ASet.c ASet.h
->>>>>>> 04bda1f7717c0aee71438700e25c4486d599e18f
 	gcc -c ASet.c

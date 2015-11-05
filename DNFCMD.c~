@@ -2,10 +2,6 @@
 #include "ADNF.h"
 #include <stdlib.h>
 
-void CancelOutNegation();
-
-void CancelOutAllNegations();
-
 void CPYTO(ADNFClause dst, ADNFClause src)	//Both are considered HEADS
 {
 
@@ -28,16 +24,6 @@ void CPYTO(ADNFClause dst, ADNFClause src)	//Both are considered HEADS
 
 }
 
-<<<<<<< HEAD
-AAndClause * GetLastAndClause(ADNFClause dnf)
-{
-	while (dnf->next)
-		dnf=dnf->next;
-		
-	return dnf;
-}
-=======
->>>>>>> 04bda1f7717c0aee71438700e25c4486d599e18f
 
 ADNFClause CPY(ADNFClause src)
 {
@@ -58,40 +44,23 @@ ADNFClause CPY(ADNFClause src)
 
 void AND( ADNFClause dst, ADNFClause src)
 {
-<<<<<<< HEAD
-	ADNFClause newChainEnd;
-=======
 	ADNFClause newChainEnd;	//the CURRENT tail of the new chain of and clauses
->>>>>>> 04bda1f7717c0aee71438700e25c4486d599e18f
 	ADNFClause oldChainI;	//old chain iterator
 //	ADNFClause oldCur;
 	ADNFClause srcI; //source iterator
 	ADNFClause t;	//temp!
 	
-<<<<<<< HEAD
-	oldChainI=dst->next;
-	newChainEnd=dst;
-	newChainEnd->next=0;
-=======
 	oldChainI=dst->next;	//to read the original and clauses from the original linked list
 	newChainEnd=dst;	//the head
 	newChainEnd->next=0;//empty list for now
->>>>>>> 04bda1f7717c0aee71438700e25c4486d599e18f
 	
 	while (oldChainI)
 	{
 		
-<<<<<<< HEAD
-		for (srcI= src->next; srcI; srcI= srcI->next)
-		{
-			t=AddClause( newChainEnd, srcI->set | oldChainI->set);	//if it's not added, t=0!
-			//Orring two sets means their union.
-=======
 		for (srcI= src->next; srcI; srcI= srcI->next)	//traverse the other operand to and all the and clauses!
 		{
 			t=AddClause( newChainEnd, srcI->set | oldChainI->set);	//if it's not added, t=0!
 			//Orring two sets means their union, therefore ANDing the and clauses
->>>>>>> 04bda1f7717c0aee71438700e25c4486d599e18f
 			
 			newChainEnd= (t)? (Last(t)): (newChainEnd);	//if the new clause is not added, it has not deleted anything either
 		}
@@ -102,10 +71,19 @@ void AND( ADNFClause dst, ADNFClause src)
 		oldChainI= t;
 	}	
 	
-<<<<<<< HEAD
-	dst->next= newFirst;
-=======
->>>>>>> 04bda1f7717c0aee71438700e25c4486d599e18f
+}
+
+void freeDNFClause(ADNFClause dnf)
+{
+	ADNFClause next, cur= dnf->next;
+
+	dnf->next=0;
+	
+	for (; cur; cur=next)
+	{
+		next= cur->next;
+		free(cur);
+	}
 }
 
 void OR ( ADNFClause dst, ADNFClause src)
@@ -114,22 +92,25 @@ void OR ( ADNFClause dst, ADNFClause src)
 		AddClause(dst, src->set);
 }
 
-<<<<<<< HEAD
-void NOT( ADNFClause dst);
-=======
 void NOT( ADNFClause dst)
 {
 	ADNFClause oldChainHead;
 	ADNFClause newORClause;	//each previously AND clause becomes an OR clause
+	int i;
+
 	oldChainHead->next= dst->next;
 	oldChainHead->prev= 0;
 	
 	dst->next=0;
-	InitDNFClause(&newOrClause);
+	InitAndClauseLinkedList(&newORClause);
 	
 	for (oldChainHead= oldChainHead->next; oldChainHead; oldChainHead= oldChainHead->next)
 	{
-		
+		for (i=0; i<ASET_SIZE; i++)
+			if (SET_MEMBER(oldChainHead->set, i))
+				AddClause(newORClause, SET_ADDE(0, SET_INDEX_NEGATE(i)));
+
+		AND(dst, newORClause);
+		ClearDNFClause(newORClause);
 	}
 }
->>>>>>> 04bda1f7717c0aee71438700e25c4486d599e18f

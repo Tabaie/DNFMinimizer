@@ -78,22 +78,14 @@ void PrintSet(ASet a)
 void PrintSet_IncNeg(ASet a)	//Print a set with negated literals
 {
 	int i;
-	for (i=0; i< sizeof(ASet)*4; i++)
+	for (i=ASET_SIZE_HALF-1; i>= 0; i--)
 	{
-		if (a%2)
+		if (SET_MEMBER(a,i))
 			printf("_%d", i);
-			
-		a/=2;
-	}
-
-	for (i=0; i< sizeof(ASet)*4; i++)
-	{
-		if (a%2)
+		if (SET_MEMBER(a,SET_INDEX_NEGATE(i)))
 			printf("_~%d", i);
 			
-		a/=2;
 	}
-
 	
 	printf(" ");
 
